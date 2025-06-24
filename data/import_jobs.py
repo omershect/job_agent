@@ -19,7 +19,19 @@ df.rename(columns={
 
 # Generate stable hash IDs from URL (or combine fields if URL is missing)
 #df["id"] = df["url"].apply(lambda x: hashlib.sha256(x.encode()).hexdigest())
-df["id"] = df["url"].fillna("").apply(lambda x: hashlib.sha256(x.encode()).hexdigest() if x else "")
+#df["id"] = df["url"].fillna("").apply(lambda x: hashlib.sha256(x.encode()).hexdigest() if x else "")
+
+
+
+# Generate unique IDs using title + company + posted (formerly date_applied)
+df["id"] = df.apply(
+    lambda row: hashlib.sha256(
+        f"{row['title']}|{row['company']}|{row['posted']}".encode()
+    ).hexdigest(),
+    axis=1
+)
+
+
 
 
 # Add missing columns required by schema with default values
@@ -36,8 +48,10 @@ columns = [
 ]
 df = df[columns]
 
+print(df[["title", "company", "posted", "id"]].head())
+
 # Connect to the database and insert records
-conn = sqlite3.connect("job_agent.db")
+conn = sqlite3.connect("E:/job_agent/data/jobs.db")
 df.to_sql("jobs", conn, if_exists="append", index=False)
 conn.close()
 

@@ -13,11 +13,38 @@ function App() {
     fetch('http://localhost:8000/api/jobs')
       .then((res) => res.json())
       .then((data) => {
-        const sorted = data.sort((a, b) => new Date(b.posted) - new Date(a.posted));
+        
+                
+        //const sorted = data.sort((a, b) => new Date(b.posted) - new Date(a.posted));
+
+
+        const sorted = data.sort((a, b) => {
+            const dateA = new Date(a.posted);
+            const dateB = new Date(b.posted);
+
+            const isValidA = !isNaN(dateA);
+            const isValidB = !isNaN(dateB);
+
+            if (isValidA && isValidB) {
+              return dateB - dateA; // newest first
+            } else if (isValidA) {
+              return -1; // a is valid, b is not → a before b
+            } else if (isValidB) {
+              return 1; // b is valid, a is not → b before a
+            } else {
+              return 0; // both invalid
+            }
+          });
+        
+        
         setJobs(sorted);
       })
       .catch((err) => console.error('Failed to fetch jobs:', err));
   }, []);
+
+
+
+
 
   return (
     <div className="page-container">
@@ -49,8 +76,7 @@ function App() {
                
 
               ) 
-              
-             
+                        
               : colIndex === 2 ? (
                 jobs.map((job, i) => (
                   <div key={job.id} className="kanban-card row-style">
@@ -62,8 +88,7 @@ function App() {
                  
                 ))
 
-              
-              
+                            
             ): (
                 <div className="kanban-card row-style">אין משרות בשלב זה</div>
               )}

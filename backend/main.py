@@ -21,7 +21,12 @@ def get_jobs():
     db_path = os.path.join(os.path.dirname(__file__), "..", "data", "jobs.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, company, location, url, posted FROM jobs")
+    # cursor.execute("SELECT id, title, company, location, url, date_applied FROM jobs") - Old before addding the status
+    # Include the status column so the frontend can reflect the latest
+    # application stage stored in the database
+    cursor.execute(
+        "SELECT id, title, company, location, url, date_applied, status FROM jobs"
+    )
     rows = cursor.fetchall()
     conn.close()
 
@@ -32,7 +37,8 @@ def get_jobs():
             "company": row[2],
             "location": row[3],
             "url": row[4],
-            "posted": row[5]
+            "date_applied": row[5],
+            "status": row[6],
         }
         for row in rows
     ]

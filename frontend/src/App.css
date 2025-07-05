@@ -1,4 +1,74 @@
 
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  border-bottom: 1px solid #ddd;
+}
+
+.main-title {
+  margin: 0;
+}
+
+.refresh-button {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.refresh-button:hover {
+  background-color: #0056b3;
+}
+
+
+.refresh-button.loading {
+  opacity: 0.8;
+}
+
+.refresh-button.loading::before {
+  content: "🔄";
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-left: 5px;
+}
+
+/* סיבוב האייקון */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.last-updated {
+  align-self: flex-start; /* יישר לצד שמאל */
+  font-size: 20px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.kanban-header-row {
+  display: flex;
+  width: 100%;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.kanban-header {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  background: white;
+  font-weight: bold;
+}
 
 /* Container for all columns in a grid layout */
 .kanban-container {
@@ -29,7 +99,12 @@
   border-bottom: 1px solid #ccc;
   text-align: center;
   border-top: 1px solid #ccc;
+  position: sticky;
+  top: 0;
 }
+
+
+
 
 /* Card container (inside each column) */
 .kanban-cards {

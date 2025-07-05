@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    Database schema for Job-Search Agent
    Compatible with sqlite-vec ≥ 0.1 (vec0 virtual table)
-   ------------------------------------------------------------------------- */
+--------------------------------------------------------------------------- */
 
 /* 1. master catalog of every job scraped */
 CREATE TABLE IF NOT EXISTS jobs (
@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   company        TEXT,
   location       TEXT,
   url            TEXT,
-  posted         DATE,                        -- yyyy-mm-dd from the site
+  date_applied   DATE,                        -- renamed from 'posted'
+  status         TEXT,                        -- added status field
   jd             TEXT,                        -- full job-description HTML/markdown
 
   /* agent-generated scoring & commentary */
@@ -21,11 +22,10 @@ CREATE TABLE IF NOT EXISTS jobs (
   scraped_at     DATETIME  DEFAULT CURRENT_TIMESTAMP
 );
 
-/* 2. vector index for semantic search / similarity
-      vec0 uses rowid as the implicit primary key; we mirror jobs.id */
+/* 2. vector index for semantic search / similarity */
 CREATE VIRTUAL TABLE IF NOT EXISTS job_vectors
   USING vec0(
-    embedding FLOAT[384]                      -- 384-dim sentence-transformer
+    embedding FLOAT[384]
   );
 
 /* 3. pipeline tracking: what *you* did with each job */

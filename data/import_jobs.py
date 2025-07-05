@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import subprocess
 from pathlib import Path
 
 import pandas as pd
@@ -18,31 +19,47 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT_DIR / "data"
 DB_PATH = DATA_DIR / "jobs.db"
 CSV_PATH = DATA_DIR / "Imported_Jobs.csv"
-SCHEMA_PATH = ROOT_DIR / "backend" / "schema.sql"
+INIT_DB_SCRIPT = ROOT_DIR / "backend" / "init_db.py"
 
 
 def load_csv() -> pd.DataFrame:
-    """Load and normalise the CSV file for import."""
+    """Load and normalize the CSV file for import."""
     df = pd.read_csv(CSV_PATH)
-    df.rename(columns={"link": "url", "date_applied": "posted"}, inplace=True)
+
+    # Rename columns to match your DB schema
+    df.rename(columns={
+        "link": "url",
+        "Date Applied": "date_applied"
+    }, inplace=True)
+
+    # Create a stable ID hash
     df["id"] = df.apply(
         lambda row: hashlib.sha256(
-            f"{row['title']}|{row['company']}|{row['posted']}".encode()
+            f"{row['title']}|{row['company']}|{row['date_applied']}".encode()
         ).hexdigest(),
         axis=1,
     )
+
+    # Default or empty fields
     df["location"] = ""
     df["jd"] = ""
     df["match_score"] = 0.0
     df["rationale"] = ""
     df["recommendation"] = ""
+
+    # If "status" column doesn't exist, default to "new"
+    if "status" not in df.columns:
+        df["status"] = "new"
+
+    # Arrange columns to match your schema
     cols = [
         "id",
         "title",
         "company",
         "location",
         "url",
-        "posted",
+        "date_applied",
+        "status",
         "jd",
         "match_score",
         "rationale",
@@ -58,12 +75,14 @@ def insert_rows(rows: pd.DataFrame) -> None:
 
 
 def reinit_db() -> None:
-    """Remove the existing database and recreate the schema."""
+    """Remove the existing database and recreate the schema using init_db.py."""
     if DB_PATH.exists():
         DB_PATH.unlink()
-    with sqlite3.connect(DB_PATH) as conn:
-        schema_sql = SCHEMA_PATH.read_text(encoding="utf-8")
-        conn.executescript(schema_sql)
+
+    subprocess.run(
+        ["python", str(INIT_DB_SCRIPT)],
+        check=True
+    )
 
 
 def import_new_rows(df: pd.DataFrame) -> None:

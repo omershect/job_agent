@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   rationale      TEXT,                        -- short LLM explanation
   recommendation TEXT,                        -- 'apply' | 'skip' | 'stretch'
 
+   comment        TEXT DEFAULT '',             -- user comment field
+
   scraped_at     DATETIME  DEFAULT CURRENT_TIMESTAMP
 );
 

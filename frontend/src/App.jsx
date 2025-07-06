@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+/*import React, { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
-  const columns = ['ראיון', 'סטאטוס', 'תאריך הגשה', 'הצעות', '#'];
+  //const columns = ['#','ראיון','תאריך הגשה','סטאטוס', 'הצעות'];
+  const columns = ['הצעות', 'ראיון', 'תאריך הגשה', 'סטאטוס', '#'];
 
   const [jobs, setJobs] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -121,6 +122,94 @@ return (
   </div>
 );
 
+}
+
+export default App;
+*/
+
+import React, { useEffect, useState } from "react";
+import "./App.css";
+
+function App() {
+  const [jobs, setJobs] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  function fetchJobs() {
+    setLoading(true);
+    fetch("http://localhost:8000/api/jobs")
+      .then((res) => res.json())
+      .then((data) => {
+        const sorted = data.sort((a, b) => {
+          const dateA = new Date(a.date_applied);
+          const dateB = new Date(b.date_applied);
+          return dateB - dateA;
+        });
+        setJobs(sorted);
+        setLastUpdated(new Date());
+      })
+      .catch((err) => console.error("Failed to fetch jobs:", err))
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  return (
+    <div className="page-container">
+      <div className="sticky-header">
+        <h1 className="main-title">המשרות שלי</h1>
+        <button
+          className={`refresh-button ${loading ? "loading" : ""}`}
+          onClick={fetchJobs}
+          disabled={loading}
+        >
+          {loading ? "מרענן..." : "🔄 רענן נתונים"}
+        </button>
+        {lastUpdated && (
+          <div className="last-updated">
+            עדכון אחרון: {lastUpdated.toLocaleString()}
+          </div>
+        )}
+      </div>
+
+      {/* Header */}
+      <div className="kanban-row header">
+        <div>#</div>
+        <div>משרה</div>
+        <div>תאריך הגשה</div>
+        <div>סטאטוס</div>
+        <div>הערות</div>
+      </div>
+
+      {/* Rows */}
+      {jobs.length === 0 && (
+        <div className="kanban-row">
+          <div className="kanban-cell" style={{ gridColumn: "1 / -1" }}>
+            אין משרות בשלב זה
+          </div>
+        </div>
+      )}
+      {jobs.map((job, i) => (
+        <div className="kanban-row" key={job.id || i}>
+          <div>{i + 1}</div>
+          <div>
+            <strong>{job.title}</strong><br/>
+            {job.company}<br/>
+            <a href={job.url} target="_blank" rel="noopener noreferrer">
+              לצפייה
+            </a>
+          </div>
+          <div>{job.date_applied ? new Date(job.date_applied).toLocaleDateString() : "—"}</div>
+          <div>{job.status || "—"}</div>
+          <div>{job.comment || "—"}</div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default App;

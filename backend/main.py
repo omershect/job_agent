@@ -39,6 +39,8 @@ def get_jobs():
             "url": row[4],
             "date_applied": row[5],
             "status": row[6],
+           # "comment": row[7]
+            
         }
         for row in rows
     ]

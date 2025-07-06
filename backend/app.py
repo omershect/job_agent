@@ -7,7 +7,7 @@ app = Flask(__name__)
 def get_jobs():
     conn = sqlite3.connect('data/job_agent.db')  # Adjust path as needed
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, company, location, url, posted, status FROM jobs")
+    cursor.execute("SELECT id, title, company, location, url, posted, status,conmment FROM jobs")
     rows = cursor.fetchall()
     conn.close()
 
@@ -19,8 +19,9 @@ def get_jobs():
             "location": row[3],
             "url": row[4],
             "posted": row[5],
-            "status": row[6]
-        }
+            "status": row[6],
+          "comment": row[7]
+          }
         for row in rows
     ]
     return jsonify(jobs)

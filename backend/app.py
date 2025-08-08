@@ -20,7 +20,7 @@ def get_jobs():
             "url": row[4],
             "posted": row[5],
             "status": row[6],
-          "comment": row[7]
+            "comment": row[7]
           }
         for row in rows
     ]

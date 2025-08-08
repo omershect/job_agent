@@ -4,6 +4,7 @@ import sqlite3
 import os
 from fastapi import Request
 from pydantic import BaseModel
+from uuid import uuid4
 
 app = FastAPI()
 
@@ -96,14 +97,23 @@ class JobCreate(BaseModel):
 
 @app.post("/api/jobs")
 def add_job(job: JobCreate):
-    job_id = payload.id or uuid4().hex  #  generate when missing
+    job_id = job.id or uuid4().hex  # generate when missing
     db_path = os.path.join(os.path.dirname(__file__), "..", "data", "jobs.db")
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO jobs (id,title, company, location, url, date_applied, status, comment)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (job.title, job.company, job.location, job.url, job.date_applied, job.status, job.comment))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(db_path) as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO jobs (id, title, company, location, url, date_applied, status, comment)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            job_id,                 # <-- include this!
+            job.title,
+            job.company,
+            job.location,
+            job.url,
+            job.date_applied,
+            job.status,
+            job.comment,
+        ))
+        conn.commit()
+   
     return {"message": "Job added"}
